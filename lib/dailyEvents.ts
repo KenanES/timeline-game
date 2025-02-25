@@ -27,10 +27,10 @@ export function getDailyEvents() {
   const cutoff = new Date(pstDate)
   cutoff.setHours(0, 20, 0, 0) // Set to 12:20 AM
   
-  // If current time is after cutoff, use tomorrow's date as seed
+  // If current time is before cutoff, use yesterday's date as seed
   const seedDate = new Date(pstDate)
-  if (pstDate > cutoff) {
-    seedDate.setDate(seedDate.getDate() + 1)
+  if (pstDate < cutoff) {
+    seedDate.setDate(seedDate.getDate() - 1)
   }
   const dateString = seedDate.toISOString().split('T')[0]
   let seed = 0
