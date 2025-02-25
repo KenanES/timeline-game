@@ -23,9 +23,9 @@ export function getDailyEvents() {
   const now = new Date()
   now.setHours(now.getHours() - 8)
   
-  // Get start of day
+  // Get start of day at 12:15 AM PST
   const today = new Date(now)
-  today.setHours(0, 0, 0, 0)
+  today.setHours(0, 15, 0, 0) // Set to 12:15 AM
   
   // Use the date as a seed for consistent daily selection
   const dateString = today.toISOString().split('T')[0]
