@@ -2,6 +2,7 @@ import type React from "react"
 import "./globals.css"
 import type { Metadata } from "next"
 import { Inter, Merriweather } from "next/font/google"
+import { Toaster } from "sonner"
 
 const merriweather = Merriweather({
   weight: ["400", "700"],
@@ -24,7 +25,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${merriweather.variable} font-sans`}>{children}</body>
+      <body className={`${inter.variable} ${merriweather.variable} font-sans`}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   )
 }

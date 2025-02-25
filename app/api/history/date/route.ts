@@ -1,41 +1,65 @@
-import { NextResponse } from "next/server"
+import { NextResponse } from "next/server";
 
-const fallbackEvents = [
-  { date: "1215-06-15", content: "Signing of the Magna Carta" },
+const FALLBACK_EVENTS = [
+  { date: "1215-06-15", content: "Magna Carta Signed" },
   { date: "1453-05-29", content: "Fall of Constantinople" },
-  { date: "1492-10-12", content: "Columbus reaches the Americas" },
-  { date: "1595-01-01", content: "Shakespeare writes Romeo and Juliet" },
-  { date: "1609-08-25", content: "Galileo demonstrates his first telescope" },
-]
+  { date: "1492-10-12", content: "Columbus Discovers America" },
+  { date: "1595-01-01", content: "Romeo and Juliet Written" },
+  { date: "1609-08-25", content: "Telescope Invented" },
+];
 
 export async function GET() {
-  console.log("API route handler started")
   try {
-    const today = new Date().toISOString().split("T")[0]
-    console.log(`Fetching events for date: ${today}`)
+    // Get today's date at 12:01 AM
+    const now = new Date();
+    let today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString().split("T")[0];
+    
+    // Check if we need to update to the next day
+    if (now.getHours() === 0 && now.getMinutes() >= 1) {
+      const tomorrow = new Date(now.setDate(now.getDate() + 1));
+      today = tomorrow.toISOString().split("T")[0];
+    }
+    console.log(`Fetching events for date: ${today}`);
 
-    const response = await fetch(`https://events.historylabs.io/date/${today}`)
+    const res = await fetch(`https://events.historylabs.io/date/${today}`, {
+      next: { revalidate: 86400 }, // Revalidate daily
+    });
 
-    console.log(`HistoryLabs API response status: ${response.status}`)
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    if (!res.ok) {
+      console.error(`API responded with ${res.status}`);
+      throw new Error(`API responded with ${res.status}`);
     }
 
-    const data = await response.json()
-    console.log(`HistoryLabs API response data:`, JSON.stringify(data))
+    const data = await res.json();
 
-    if (!data.events || data.events.length === 0) {
-      console.log(`No events found for date: ${today}, using fallback data`)
-      return NextResponse.json({ events: fallbackEvents })
+    // Validate response data
+    if (!data.events || !Array.isArray(data.events) || data.events.length < 5) {
+      console.log(`Insufficient events from API, using fallback data`);
+      return NextResponse.json({ events: FALLBACK_EVENTS });
     }
 
-    console.log(`Returning ${data.events.length} events from HistoryLabs API`)
-    return NextResponse.json(data)
+    // Process and validate each event
+    const validEvents = data.events
+      .filter(event => (
+        event.date && 
+        event.content && 
+        typeof event.date === 'string' && 
+        typeof event.content === 'string'
+      ))
+      .slice(0, 5);
+
+    if (validEvents.length < 5) {
+      console.log(`Not enough valid events from API, using fallback data`);
+      return NextResponse.json({ events: FALLBACK_EVENTS });
+    }
+
+    return NextResponse.json({ events: validEvents });
   } catch (error) {
-    console.error(`Error fetching events from HistoryLabs API:`, error)
-    console.log(`Using fallback data due to API error`)
-    return NextResponse.json({ events: fallbackEvents })
+    console.error("API Error:", error);
+    return NextResponse.json({ 
+      events: FALLBACK_EVENTS,
+      error: error instanceof Error ? error.message : "Unknown error occurred"
+    });
   }
 }
 
