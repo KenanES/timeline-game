@@ -21,15 +21,15 @@ const EVENTS_PER_DAY = 5
 export function getDailyEvents() {
   // Get current date in PST (UTC-8)
   const now = new Date()
-  now.setHours(now.getHours() - 8)
+  const pstDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }))
   
   // Get cutoff time (12:20 AM PST)
-  const cutoff = new Date(now)
+  const cutoff = new Date(pstDate)
   cutoff.setHours(0, 20, 0, 0) // Set to 12:20 AM
   
   // If current time is after cutoff, use tomorrow's date as seed
-  const seedDate = new Date(now)
-  if (now > cutoff) {
+  const seedDate = new Date(pstDate)
+  if (pstDate > cutoff) {
     seedDate.setDate(seedDate.getDate() + 1)
   }
   const dateString = seedDate.toISOString().split('T')[0]
