@@ -23,12 +23,16 @@ export function getDailyEvents() {
   const now = new Date()
   now.setHours(now.getHours() - 8)
   
-  // Get start of day at 12:15 AM PST
-  const today = new Date(now)
-  today.setHours(0, 20, 0, 0) // Set to 12:20 AM
+  // Get cutoff time (12:20 AM PST)
+  const cutoff = new Date(now)
+  cutoff.setHours(0, 20, 0, 0) // Set to 12:20 AM
   
-  // Use the date as a seed for consistent daily selection
-  const dateString = today.toISOString().split('T')[0]
+  // If current time is after cutoff, use tomorrow's date as seed
+  const seedDate = new Date(now)
+  if (now > cutoff) {
+    seedDate.setDate(seedDate.getDate() + 1)
+  }
+  const dateString = seedDate.toISOString().split('T')[0]
   let seed = 0
   for (let i = 0; i < dateString.length; i++) {
     seed = ((seed << 5) - seed) + dateString.charCodeAt(i)
