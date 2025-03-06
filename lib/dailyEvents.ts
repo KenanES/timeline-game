@@ -23,20 +23,26 @@ export function getDailyEvents() {
   const now = new Date()
   const pstDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }))
   
-  // Get cutoff time (12:20 AM PST)
-  const cutoff = new Date(pstDate)
-  cutoff.setHours(0, 20, 0, 0) // Set to 12:20 AM
+  // Get hours and minutes in PST for comparison
+  const currentHours = pstDate.getHours()
+  const currentMinutes = pstDate.getMinutes()
   
-  // If current time is before cutoff, use yesterday's date as seed
+  // Create a date object for the seed (default to today)
   const seedDate = new Date(pstDate)
-  if (pstDate < cutoff) {
+  
+  // If current time is before 12:20 AM PST, use yesterday's date as seed
+  if (currentHours === 0 && currentMinutes < 20) {
     seedDate.setDate(seedDate.getDate() - 1)
   }
+  
+  // Format date as YYYY-MM-DD for consistent seeding
   const dateString = seedDate.toISOString().split('T')[0]
+  
+  // Create a deterministic seed from the date string
   let seed = 0
   for (let i = 0; i < dateString.length; i++) {
     seed = ((seed << 5) - seed) + dateString.charCodeAt(i)
-    seed = seed & seed // Convert to 32-bit integer
+    seed = seed & 0xFFFFFFFF // Convert to 32-bit integer
   }
 
   // Use the seed to select today's events
