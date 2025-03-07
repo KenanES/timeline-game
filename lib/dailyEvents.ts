@@ -1,4 +1,12 @@
-const allEvents = [
+// Define the event interface
+export interface HistoricalEvent {
+  id: number
+  title: string
+  year: number
+}
+
+// Fallback events in case the API fails
+export const fallbackEvents: HistoricalEvent[] = [
   { id: 1, title: "First Moon Landing", year: 1969 },
   { id: 2, title: "World Wide Web Invented", year: 1989 },
   { id: 3, title: "Discovery of DNA Structure", year: 1953 },
@@ -14,11 +22,62 @@ const allEvents = [
   { id: 13, title: "First Heart Transplant", year: 1967 },
   { id: 14, title: "First Space Station", year: 1971 },
   { id: 15, title: "First Email Sent", year: 1971 }
-] as const
+]
 
-const EVENTS_PER_DAY = 5
+export const EVENTS_PER_DAY = 5
 
-export function getDailyEvents() {
+// API URL for fetching historical events
+const API_URL = "https://api.api-ninjas.com/v1/historicalevents"
+// API key for the API Ninjas service
+const API_KEY = process.env.API_NINJAS_KEY || ""
+
+// Cache to store fetched events
+let eventsCache: { [date: string]: HistoricalEvent[] } = {}
+
+/**
+ * Fetches historical events from the API or returns cached events
+ * @param month Month (1-12)
+ * @param day Day of month (1-31)
+ * @returns Array of historical events
+ */
+async function fetchHistoricalEvents(month: number, day: number): Promise<HistoricalEvent[]> {
+  try {
+    // Format the month and day for the API
+    const formattedMonth = month.toString().padStart(2, '0')
+    const formattedDay = day.toString().padStart(2, '0')
+    
+    // Make the API request
+    const response = await fetch(`${API_URL}?month=${formattedMonth}&day=${formattedDay}`, {
+      headers: {
+        'X-Api-Key': API_KEY
+      }
+    })
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`)
+    }
+    
+    // Parse the response
+    const data = await response.json()
+    
+    // Transform the API response to our event format
+    return data.map((event: any, index: number) => ({
+      id: index + 1,
+      title: event.event,
+      year: parseInt(event.year, 10)
+    })).slice(0, EVENTS_PER_DAY)
+  } catch (error) {
+    console.error('Error fetching historical events:', error)
+    // Return fallback events if the API fails
+    return fallbackEvents.slice(0, EVENTS_PER_DAY)
+  }
+}
+
+/**
+ * Gets daily events for the timeline game
+ * @returns Array of historical events for today
+ */
+export async function getDailyEvents(): Promise<HistoricalEvent[]> {
   // Get current date in PST (UTC-8)
   const now = new Date()
   const pstDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }))
@@ -35,22 +94,23 @@ export function getDailyEvents() {
     seedDate.setDate(seedDate.getDate() - 1)
   }
   
-  // Format date as YYYY-MM-DD for consistent seeding
+  // Format the date as YYYY-MM-DD for cache key
   const dateString = seedDate.toISOString().split('T')[0]
   
-  // Create a deterministic seed from the date string
-  let seed = 0
-  for (let i = 0; i < dateString.length; i++) {
-    seed = ((seed << 5) - seed) + dateString.charCodeAt(i)
-    seed = seed & 0xFFFFFFFF // Convert to 32-bit integer
+  // Check if we have cached events for this date
+  if (eventsCache[dateString]) {
+    return eventsCache[dateString]
   }
-
-  // Use the seed to select today's events
-  const shuffledEvents = [...allEvents]
-  for (let i = shuffledEvents.length - 1; i > 0; i--) {
-    const j = Math.abs((seed * (i + 1)) % (i + 1))
-    ;[shuffledEvents[i], shuffledEvents[j]] = [shuffledEvents[j], shuffledEvents[i]]
-  }
-
-  return shuffledEvents.slice(0, EVENTS_PER_DAY)
+  
+  // Get month (1-12) and day (1-31) for API request
+  const month = seedDate.getMonth() + 1 // JavaScript months are 0-indexed
+  const day = seedDate.getDate()
+  
+  // Fetch events for this date
+  const events = await fetchHistoricalEvents(month, day)
+  
+  // Cache the events
+  eventsCache[dateString] = events
+  
+  return events
 }

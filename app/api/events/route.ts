@@ -4,6 +4,11 @@ import { getDailyEvents } from '@/lib/dailyEvents'
 export const runtime = 'edge'
 
 export async function GET() {
-  const events = getDailyEvents()
-  return NextResponse.json(events)
+  try {
+    const events = await getDailyEvents()
+    return NextResponse.json(events)
+  } catch (error) {
+    console.error('Error fetching daily events:', error)
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
+  }
 }
