@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "preprod": true
+    }
+  },
+  "github": {
+    "enabled": true,
+    "silent": true
+  }
+}
