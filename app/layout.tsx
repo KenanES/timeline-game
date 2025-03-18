@@ -3,6 +3,7 @@ import "./globals.css"
 import type { Metadata } from "next"
 import { Inter, Merriweather } from "next/font/google"
 import { Toaster } from "sonner"
+import EnvironmentIndicator from "@/components/EnvironmentIndicator"
 
 const merriweather = Merriweather({
   weight: ["400", "700"],
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${merriweather.variable} font-sans`}>
         {children}
         <Toaster />
+        <EnvironmentIndicator />
       </body>
     </html>
   )

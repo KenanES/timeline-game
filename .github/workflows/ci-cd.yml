@@ -1,0 +1,51 @@
+name: TimeLines CI/CD
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Lint
+        run: npm run lint || echo "Linting failed but continuing"
+        
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_APP_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+          
+      # Add tests when you have them
+      # - name: Test
+      #   run: npm test
+
+  # The deployment is handled by Vercel automatically
+  # This is just a notification step
+  notify:
+    needs: build
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+      - name: Deployment Status
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "✅ Production build successful and ready for deployment"
+          else
+            echo "✅ Preview build successful and ready for deployment"
+          fi

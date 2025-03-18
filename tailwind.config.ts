@@ -7,6 +7,7 @@ module.exports = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
+  // Line clamp is now part of Tailwind core in v3.3+
   theme: {
     container: {
       center: true,
