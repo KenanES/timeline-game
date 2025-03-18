@@ -13,7 +13,7 @@ const merriweather = Merriweather({
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "TimeLine Game",
+  title: "TimeLines Game",
   description: "A daily historical event sequencing game",
     generator: 'v0.dev'
 }
