@@ -54,7 +54,7 @@ This project uses a multi-environment setup:
 ## Environment URLs
 
 - **Development**: [http://localhost:3000](http://localhost:3000)
-- **Preview/Staging**: [https://timelines-game-git-development-yourusername.vercel.app](https://timelines-game-git-development-yourusername.vercel.app)
+- **Preview/Staging**: [https://timeline-game-git-development-kenanes.vercel.app](https://timeline-game-git-development-kenanes.vercel.app)
 - **Production**: [https://playtimelines.com](https://playtimelines.com)
 
 ## Environment Variables

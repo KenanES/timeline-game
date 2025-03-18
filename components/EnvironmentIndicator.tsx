@@ -19,8 +19,8 @@ export default function EnvironmentIndicator() {
     'bg-green-500';
 
   return (
-    <div className={`fixed bottom-2 right-2 z-50 ${bgColor} text-white text-xs px-2 py-1 rounded-md opacity-75 hover:opacity-100 transition-opacity`}>
-      {name}
+    <div className={`fixed bottom-2 right-2 z-50 ${bgColor} text-white text-xs px-2 py-1 rounded-md opacity-90 hover:opacity-100 transition-opacity shadow-md`}>
+      🔧 {name} Environment
     </div>
   );
 }

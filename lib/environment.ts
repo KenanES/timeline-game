@@ -26,7 +26,7 @@ const environments: Record<Environment, EnvironmentConfig> = {
   },
   preview: {
     name: 'Preview/Staging',
-    url: 'https://timelines-game-git-development-yourusername.vercel.app',
+    url: 'https://timeline-game-git-development-kenanes.vercel.app',
     apiUrl: '/api',
     isProduction: false,
     showDebugInfo: true,
